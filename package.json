@@ -1,0 +1,11 @@
+{
+  "name": "sls-todo-api",
+  "version": "1.0.0",
+  "description": "Serverless Todo API",
+  "author": "Anand Mani Sankar",
+  "license": "MIT",
+  "dependencies": {
+    "aws-sdk": "^2.207.0",
+    "uuid": "^3.2.1"
+  }
+}
