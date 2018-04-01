@@ -49,7 +49,7 @@ functions:
           path: todos/{id}
           method: DELETE
           cors: true 
-  list:sls i
+  list:
     handler: todos/list.list          
     events:    
       - http:
