@@ -1,11 +1,41 @@
 
+# Name of the service
 service: sls-todo-api
 
+# Plugins enhancing serverless framework
+plugins:
+  # Locally dynamodb for local invokation and testing
+  - serverless-dynamodb-local
+  # Offline plugin for local development and testing
+  - serverless-offline
+
+custom:
+  # Offline plugin configuration
+  serverless-offline:
+    port: 4000
+  
+  # Local dynamodb configuration
+  dynamodb:
+    start:
+      port: 9000
+      inMemory: true
+      migrate: true
+      seed: true
+    # Seed data for local todo table
+    seed:
+      todo:
+        sources:
+          - table: ${self:service}-todo-store
+            sources: [./offline/seeds/data.json]
+      
+# Configure AWS as provider
 provider:
   name: aws
   runtime: nodejs6.10
+  # Name of dynamo db table used to store ToDos
   environment: 
     TODOS_TABLE: ${self:service}-todo-store
+  # Roles required to operate on the dynamo db table
   iamRoleStatements:
     - Effect: Allow
       Action: 
@@ -17,12 +47,16 @@ provider:
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
       Resource: "arn:aws:dynamodb:eu-central-1:*:table/${self:provider.environment.TODOS_TABLE}"
+  # Configured as a dev stage
   stage: dev
+  # Chosen AWS Region
   region: eu-central-1
 
+# FaaS funtions
 functions:
   create:
     handler: todos/create.create
+    # Configuring HTTP events to link API Gateway to Lambda
     events:
       - http:
           path: todos
@@ -57,6 +91,7 @@ functions:
           method: GET
           cors: true           
 
+# Confiure the resources required for this service: AWS Dynamo DB Table
 resources:
   Resources:
     TodoTable:
