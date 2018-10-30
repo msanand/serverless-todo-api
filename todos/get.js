@@ -12,11 +12,25 @@ const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
 
 module.exports.get = (event, context, callback) => {
+    const headers = {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+        "X-Requested-With": "*",
+        "Access-Control-Allow-Headers": 'Content-Type,X-Amz-Date,Authorization,x-api-key,x-requested-with,Cache-Control',
+    };
+
+    if (event.headers["x-api-key"] === undefined) {
+        callback(null, { headers: headers, statusCode: 400, body: "Missing or invalid x-api-key header.", headers: { "Content-Type": "text/plain" } });
+    } else if (event.headers["x-api-key"].length < 1) {
+        callback(null, { headers: headers, statusCode: 400, body: "Empty x-api-key header value.", headers: { "Content-Type": "text/plain" } });
+    } else if (event.pathParameters.id === undefined) {
+        callback(null, { headers: headers, statusCode: 400, body: "Missing 'id' in URL path.", headers: { "Content-Type": "text/plain" } });
+    }
 
     const params = {
         TableName: process.env.TODOS_TABLE,
         Key: {
-            user: event.headers["X-Api-Key"],
+            user: event.headers["x-api-key"],
             id: event.pathParameters.id,
         }
     };
@@ -34,9 +48,14 @@ module.exports.get = (event, context, callback) => {
             return;
         }
 
+        if (result === undefined || result.Item === "") {
+            callback(null, { statusCode: 400, body: "No item found. Check that the API key and item ID are correct.", headers: { "Content-Type": "text/plain" } });
+        }
+
         callback(null, {
+            headers: headers,
             statusCode: 200,
-            body: JSON.stringify(result.Item)
+            body: JSON.stringify(result.Item),
         });
     });
 

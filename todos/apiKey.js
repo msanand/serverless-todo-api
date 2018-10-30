@@ -13,8 +13,21 @@ const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
 
 module.exports.create = (event, context, callback) => {
+    const headers = {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": "true",
+        "Content-Type": "application/json",
+        "X-Requested-With": "*",
+        "Access-Control-Allow-Headers": 'Content-Type,X-Amz-Date,Authorization,x-api-key,x-requested-with,Cache-Control',
+    };
 
     const userInfo = JSON.parse(event.body);
+
+    if (userInfo.email === undefined) {
+        callback(null, { headers: headers, statusCode: 400, body: JSON.stringify("Missing or malformed 'email' property in JSON object in request body.") });
+    } else if (userInfo.name === undefined) {
+        callback(null, { headers: headers, statusCode: 400, body: JSON.stringify("Missing or malformed 'name' property in JSON object in request body.") });
+    }
 
     var timestamp = moment().valueOf();
     const secret = timestamp + " a secret 23g9823f98jg29";
@@ -27,11 +40,8 @@ module.exports.create = (event, context, callback) => {
 
     callback(null, {
         statusCode: 200,
+        headers: headers,
         body: JSON.stringify(data),
-        headers: {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Credentials': true,
-        },
     });
 
 };

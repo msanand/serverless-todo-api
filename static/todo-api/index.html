@@ -13,43 +13,339 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="styles.css" type="text/css">
 
-    <title>CSE 204A API Key</title>
+    <title>CSE 204A - ToDo API</title>
 </head>
 
 <body>
 <div class="container">
-    <h1>CSE 204A API Key</h1>
-    <p>This page provides the documentation for getting an API Key to use for assignments in WUSTL CSE 204A.</p>
-    <p>Please type your WUSTL email address in the field below and click &quot;submit&quot;. A unique API key will
-        be generated that you can use to submit and retrieve data. This API Key is unique to you. If you lose your API key, you will also lose any data associated with it. However, you can generate a new API key at any time with the same name and email address, to start over with new data.</p>
-    <!--
-    register form-->
-    <div class="row">
-        <div class="col-lg-6 offset-md-3">
-            <form method="POST" action="" id="api-form">
-                <div class="form-group">
-                    <label for="name">Name:</label>
-                    <input class="form-control" id="name" type="text" placeholder="first and last" name="name" required="required">
+    <h1>CSE 204A - ToDo API</h1>
+    <p>This page provides documentaion for using the ToDo API for CSE 204A. This API allows you to list, get, create, update, and delete ToDo items via a REST API interface. This API is hosted in AWS and you can view the source code on GitHub here: <a href="https://github.com/kraigh/serverless-todo-api">https://github.com/kraigh/serverless-todo-api</a></p>
+    <h2>API Key</h2>
+    <p>Generate an API key here: <a href="https://cse204.kraigh.net/api-key">https://cse204.kraigh.net/api-key</a>.</p>
+    <p>This API key is used to reference all data associated with your user. Note: it is essentially a password that authorizes API calls to access your data, so keep it private!</p>
+    <p>The API key must be sent with every request to the API and is sent via a header with a key of <code>x-api-key</code></p>
+    <h2>ToDo Data Object</h2>
+    <p>Each ToDo is stored in the database with a number of fields. Some can be modified, and some are set automatically. See the table below for an explanation of the properties in each <code>todo</code> object</p>
+        <table class="table">
+            <thead>
+                <tr class="d-flex">
+                    <th class="col-2">Property Name</th>
+                    <th class="col-1">Data Type</th>
+                    <th class="col-2">Example</th>
+                    <th class="col-3">Source</th>
+                    <th class="col-4">Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="d-flex">
+                    <td class="col-2">
+                        <code>text</code>
+                    </td>
+                    <td class="col-1"><pre>string</pre></td>
+                    <td class="col-2 text-primary">Buy Groceries</td>
+                    <td class="col-3">Set by user in POST request</td>
+                    <td class="col-4">The main text of the ToDo</td>
+                </tr>
+                <tr class="d-flex">
+                    <td class="col-2">
+                        <code>id</code>
+                    </td>
+                    <td class="col-1">
+                        <pre>string</pre>
+                    </td>
+                    <td class="col-2 text-primary">0ef61ae0-dc34-11e8-bd4d-71a1c19eb6c3</td>
+                    <td class="col-3">Automatically Generated</td>
+                    <td class="col-3">Unique ID of the ToDo. Used when making updates or deleting.</td>
+                </tr>
+                <tr class="d-flex">
+                    <td class="col-2">
+                        <code>completed</code>
+                    </td>
+                    <td class="col-1">
+                        <pre>boolean</pre>
+                    </td>
+                    <td class="col-2 text-primary">false</td>
+                    <td class="col-3">Defaults to false</td>
+                    <td class="col-4">Whether or not the ToDo has been completed. Needs to be manually updated to <code>true</code>.</td>
+                </tr>
+                <tr class="d-flex">
+                    <td class="col-2">
+                        <code>created</code>
+                    </td>
+                    <td class="col-1">
+                        <pre>number</pre>
+                    </td>
+                    <td class="col-2 text-primary">1540897678</td>
+                    <td class="col-3">Set when ToDo is created.</td>
+                    <td class="col-4">Unix timestamp representing time when ToDo was created. Can be used to sort.</td>
+                </tr>
+                <tr class="d-flex">
+                    <td class="col-2">
+                        <code>updated</code>
+                    </td>
+                    <td class="col-1">
+                        <pre>number</pre>
+                    </td>
+                    <td class="col-2 text-primary">1540897798</td>
+                    <td class="col-3">Set when ToDo is modified.</td>
+                    <td class="col-4">Unix timestamp representing time when ToDo was modified. Can be used to sort.</td>
+                </tr>
+                <tr class="d-flex">
+                    <td class="col-2">
+                        <code>user</code>
+                    </td>
+                    <td class="col-1">
+                        <pre>string</pre>
+                    </td>
+                    <td class="col-2 text-primary">38c5439331dbc7e...</td>
+                    <td class="col-3">User API Key.</td>
+                    <td class="col-4">Unique ID representing a specific user who the ToDo belongs to.</td>
+                </tr>
+            </tbody>
+        </table>
+    <h2>API Methods</h2>
+    <p>The ToDo API endpoints accept JSON formatted data in the request body where indicated. All endpoints return JSON data in the response body.</p>
+    <table class="table">
+        <thead>
+            <tr class="d-flex">
+                <th class="col-4">Endpoint URL</th>
+                <th class="col-1">Method</th>
+                <th class="col-3">JSON Request Body</th>
+                <th class="col-4">JSON Response Body</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="d-flex">
+                <td class="col-4">
+                    <code>https://api.kraigh.net/todos</code>
+                    <p class="text-muted"><strong>List ToDos:</strong> This endpoint returns an array of all ToDos for the provided user. <a href="#list-info">More Info</a></p>
+                </td>
+                <td class="col-1"><code>GET</code></td>
+                <td class="col-3">(none)</td>
+                <td class="col-4">
+                    <a class="" data-toggle="collapse" href="#list-response" aria-expanded="false"
+                        aria-controls="list-response">
+                        Show Example Response
+                    </a>
+                    <pre class="text-info bg-light p-3 collapse" id="list-response">
+[
+    {
+        "completed": false,
+        "user": "&lt;your api key&gt;",
+        "text": "A thing",
+        "id": "4f8c4ff0-da29"
+    },
+    {
+        "completed": true,
+        "user": "&lt;your api key&gt;",
+        "text": "Another thing",
+        "id": "50d8cd20-da29"
+    }
+]</pre></td>
+            </tr>
+            <tr class="d-flex">
+                <td class="col-4">
+                    <code>https://api.kraigh.net/todos</code>
+                    <p class="text-muted"><strong>Create A ToDo:</strong> Sending data via a <code>POST</code> request to this endpoint will create a new ToDo. The full ToDo item will be returned, including a programmatically generated ID. <a href="#create-info">More Info</a></p>
+                </td>
+                <td class="col-1"><code>POST</code></td>
+                <td class="col-3"><pre class="text-info bg-light p-3">
+{
+"text": "Another new thing"
+}</pre></td>
+                <td class="col-4">
+                    <a class="" data-toggle="collapse" href="#create-response" aria-expanded="false" aria-controls="list-response">
+                        Show Example Response
+                    </a>
+                    <pre class="text-info bg-light p-3 collapse" id="create-response">
+{
+    "user": "&lt;your api key&gt;",
+    "id": "3a3d6a40-da37",
+    "text": "Another new thing",
+    "completed": false
+}</pre>
+                </td>
+            </tr>
+            <tr class="d-flex">
+                <td class="col-4">
+                    <code>https://api.kraigh.net/todos/{id}</code>
+                    <p class="text-muted"><strong>Get A ToDo:</strong> Sending a <code>GET</code> request to this endpoint with a valid <code>id</code> for an existing ToDo will return that ToDo. <a href="#get-info">More Info</a></p>
+                </td>
+                <td class="col-1"><code>GET</code></td>
+                <td class="col-3">(none)</td>
+                <td class="col-4">
+                    <a class="" data-toggle="collapse" href="#get-response" aria-expanded="false" aria-controls="list-response">
+                        Show Example Response
+                    </a>
+                    <pre class="text-info bg-light p-3 collapse" id="get-response">
+{
+    "completed": false,
+    "user": "&lt;your api key&gt;",
+    "text": "Another new thing",
+    "id": "3a3d6a40-da37"
+}</pre>
+                </td>
+            </tr>
+            <tr class="d-flex">
+                <td class="col-4">
+                    <code>https://api.kraigh.net/todos/{id}</code>
+                    <p class="text-muted"><strong>Update A ToDo:</strong> A <code>PUT</code> request to this endpoint with a valid <code>id</code> in the URL will allow you to update one or more properties of the ToDo. Only the properties <code>completed</code> (boolean) and <code>text</code> (string) passed in the JSON object will be updated. The full updated object will be returned in the JSON body. <a href="#update-info">More Info</a></p>
+                </td>
+                <td class="col-1"><code>PUT</code></td>
+                <td class="col-3"><pre class="text-info bg-light p-3">
+{
+    "completed": true
+}
+                </pre></td>
+                <td class="col-4">
+                    <a class="" data-toggle="collapse" href="#update-response" aria-expanded="false" aria-controls="list-response">
+                        Show Example Response
+                    </a>
+                    <pre class="text-info bg-light p-3 collapse" id="update-response">
+{
+    "completed": true,
+    "user": "&lt;your api key&gt;",
+    "text": "A thing",
+    "id": "50d8cd20-da29"
+}
+</pre>
+                </td>
+            </tr>
+            <tr class="d-flex">
+                <td class="col-4">
+                    <code>https://api.kraigh.net/todos/{id}</code>
+                    <p class="text-muted"><strong>Delete A ToDo:</strong> A <code>DELETE</code> request to this endpoint with a valid ToDo <code>id</code> in the URL will delete the ToDo with that id. An empty JSON object is returned, with a <code>200</code> status if deletion was successful, or a <code>404</code> status if that ToDo does not exist.</code> <a href="#delete-info">More Info</a></p>
+                </td>
+                <td class="col-1"><code>DELETE</code></td>
+                <td class="col-3">(none)</td>
+                <td class="col-4">(none)</td>
+            </tr>
+        </tbody>
+    </table>
+    <section id="list-info">
+        <h3>LIST All ToDos</h3>
+        <p>When your page loads, you want to make an AJAX request to get all existing
+            ToDos tied to your API key, so you can add those ToDos
+            to your HTML. Do this by making a GET AJAX request to this URL:</p>
+        <pre class="text-info bg-light p-3">https://api.kraigh.net/todos</pre>
+        <p>Note: you need send your API key as an <code>x-api-key</code> header. This is done using the <code>setRequestHeader</code> method:</p>
+        <pre class="text-info bg-light p-3">xhttp.setRequestHeader(&quot;x-api-key&quot;, &quot;abc123&quot;);</pre>
+        <p>This AJAX request will return an array of objects as JSON. Each object will be
+            a ToDo that has been previously submitted with your API key. To pare this JSON into a usable array, use <code>JSON.parse()</code>:</p>
+        <pre class="text-info bg-light p-3">var todos = JSON.parse(this.responseText);</pre>
+        <p></p>Note:
+            Before you have successfully submitted any ToDos, this array
+            will be empty.</p>
+        <div class="accordion" id="listExample">
+            <div class="card">
+                <div class="card-header" id="listJavascriptHeading">
+                    <h5 class="mb-0">
+                        <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#listJavascript"
+                            aria-expanded="true" aria-controls="listJavascript">
+                            Javascript Example +
+                        </button>
+                    </h5>
                 </div>
-                <div class="form-group">
-                    <label for="email">WUSTL Email:</label>
-                    <input class="form-control" id="email" type="email" placeholder="name@email.com" name="email"
-                        required="required">
+
+                <div id="listJavascript" class="collapse" aria-labelledby="listJavascriptHeading" data-parent="#listExample">
+                    <div class="card-body bg-light p-3">
+        <pre class="text-info">
+var xhttp = new XMLHttpRequest();
+
+xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 &amp;&amp; this.status == 200) {
+        var todos = JSON.parse(this.responseText);
+        console.log(todos);
+    }
+};
+
+xhttp.open(&quot;GET&quot;, &quot;https://api.kraigh.net/todos, true);
+xhttp.setRequestHeader("x-api-key","abc123");
+xhttp.send();</pre>
+                    </div>
                 </div>
-                <button class="btn btn-primary" type="submit" id="api-form-submit">Generate API Key</button>
-            </form>
-        </div>
-    </div>
-    <div class="row" id="api-key-container">
-        <div class="col-lg-8 offset-md-2">
-            <div class="card text-success bg-light">
-                <div class="card-header">
-                    <h3 class="card-title">Your API Key</h3>
-                </div>
-                <div class="card-body text-center"><samp id="api-key"></samp></div>
             </div>
         </div>
-    </div>
+    </section>
+    <section id="create-info">
+        <h3>POST New ToDos</h3>
+        <p>When your new ToDo form is submitted, you want to trigger a Javascript
+            event that will make an AJAX call to submit your new ToDo to
+            the server, and if saving it is successful, add your new ToDo
+            to the page&apos;s HTML. Do this by making an AJAX POST request to this
+            URL:</p>
+        <pre class="text-info bg-light p-3">https://api.kraigh.net/todos</pre>
+        <p>Your POST will need the following parameters, encoded as JSON:</p>
+        <dl><dt>text</dt>
+            <dd>The text of the to-do item</dd>
+        </dl>
+        <p>If unsuccessful, this POST request will return a text error. If successful,
+            it will return a single object containing the ToDo that has been
+            saved. This object will have a <code>text</code>, <code>id</code>, and <code>user</code> property
+            that you can use to add a new HTML element to your existing ToDo.</p>
+        <div class="accordion" id="createExample">
+            <div class="card">
+                <div class="card-header" id="createJavascriptHeading">
+                    <h5 class="mb-0">
+                        <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#createJavascript"
+                            aria-expanded="true" aria-controls="createJavascript">
+                            Javascript Example +
+                        </button>
+                    </h5>
+                </div>
+        
+                <div id="createJavascript" class="collapse" aria-labelledby="createJavascriptHeading" data-parent="#createExample">
+                    <div class="card-body bg-light p-3">
+                        <pre class="text-info">
+// Setting variable for form input (get from HTML form)
+var data = {
+    text: &quot;Some Text&quot;
+}
+
+// Initalize AJAX Request
+var xhttp2 = new XMLHttpRequest();
+
+// Response handler
+xhttp2.onreadystatechange = function() {
+
+    // Wait for readyState = 4 &amp; 200 response
+    if (this.readyState == 4 &amp;&amp; this.status == 200) {
+
+        // parse JSON response
+        var todo = JSON.parse(this.responseText);
+
+        console.log(todo);
+
+    } else if (this.readyState == 4) {
+
+        // this.status !== 200, error from server
+        console.log(this.responseText);
+
+    }
+};
+
+xhttp2.open(&quot;POST&quot;, &quot;https://api.kraigh.net/todos&quot;, true);
+
+xhttp2.setRequestHeader(&quot;Content-type&quot;, &quot;application/json&quot;);
+xhr.setRequestHeader(&quot;x-api-key&quot;, &quot;abc123&quot;);
+xhttp2.send(JSON.stringify(data));</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section id="get-info">
+        <h3>GET a ToDo</h3>
+
+    </section>
+    <section id="update-info">
+        <h3>PUT ToDo Updates</h3>
+
+    </section>
+    <section id="delete-info">
+        <h3>DELETE a ToDo</h3>
+        
+    </section>
 
 </div>
 
@@ -61,7 +357,48 @@
         crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
         crossorigin="anonymous"></script>
-    <script src="scripts.js"></script>
+    <script>
+    // LIST
+    // var data = JSON.stringify({});
+    // var xhr = new XMLHttpRequest();
+    // xhr.addEventListener("readystatechange", function () {
+    //     if (this.readyState === 4) {
+    //         console.log(this.responseText);
+    //     }
+    // });
+    // xhr.open("GET", "https://api.kraigh.net/todos");
+    // xhr.setRequestHeader("Content-Type", "application/json");
+    // xhr.setRequestHeader("x-api-key", "1");
+    // xhr.send(data);
+    // Setting variable for form input (get from HTML form)
+
+    // CREATE
+    // var data = {
+    //     text: "Some Text"
+    // }
+    // // Initalize AJAX Request
+    // var xhttp2 = new XMLHttpRequest();
+    // // Response handler
+    // xhttp2.onreadystatechange = function () {
+    //     console.log(this.readyState);
+    //     // Wait for readyState = 4 &amp; 200 response
+    //     if (this.readyState == 4 && this.status == 200) {
+    //         // parse JSON response
+    //         var todo = JSON.parse(this.responseText);
+    //         console.log(todo);
+    //         console.log(todo.id);
+    //     } else if (this.readyState == 4) {
+    //         // this.status !== 200, error from server
+    //         console.log(this.responseText);
+    //     }
+    // };
+    // xhttp2.open("POST", "https://api.kraigh.net/todos", true);
+    // xhttp2.setRequestHeader("Content-type", "application / json");
+    // xhttp2.setRequestHeader("x-api-key", "abc123");
+    // xhttp2.send(JSON.stringify(data));
+
+    
+    </script>
 </body>
 
 </html>

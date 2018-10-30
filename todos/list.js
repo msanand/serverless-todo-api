@@ -11,11 +11,25 @@ const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
 
 module.exports.list = (event, context, callback) => {
-    var params = {
+    const headers = {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": "true",
+        "Content-Type": "application/json",
+        "X-Requested-With": "*",
+        "Access-Control-Allow-Headers": 'Content-Type,X-Amz-Date,Authorization,x-api-key,x-requested-with,Cache-Control',
+    };
+
+    if (event.headers["x-api-key"] === undefined) {
+        callback(null, { headers: headers, statusCode: 400, body: JSON.stringify("Missing or invalid x-api-key header.")});
+    } else if (event.headers["x-api-key"].length < 1) {
+        callback(null, { headers: headers, statusCode: 400, body: JSON.stringify("Empty x-api-key header value.")});
+    }
+
+    const params = {
         TableName: process.env.TODOS_TABLE,
         FilterExpression: '#user = :user',
         ExpressionAttributeNames: { "#user": "user" },
-        ExpressionAttributeValues: { ':user': event.headers["X-Api-Key"] }
+        ExpressionAttributeValues: { ':user': event.headers["x-api-key"] }
     };
 
 
@@ -24,6 +38,7 @@ module.exports.list = (event, context, callback) => {
         if (error) {
             console.error(error);
             callback(null, {
+                headers: headers,
                 statusCode: error.statusCode || 501,
                 headers: {
                     'Content-Type': 'text/plain'
@@ -36,7 +51,8 @@ module.exports.list = (event, context, callback) => {
         // create a response
         const response = {
             statusCode: 200,
-            body: JSON.stringify(result.Items),
+            headers: headers,
+            body: JSON.stringify(result.Items)
         };
         callback(null, response);
     });
