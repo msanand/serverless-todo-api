@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+        crossorigin="anonymous">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css" type="text/css">
+
+    <title>CSE 204A API Key</title>
+</head>
+
+<body>
+<div class="container">
+    <h1>CSE 204A API Key</h1>
+    <p>This page provides the documentation for getting an API Key to use for assignments in WUSTL CSE 204A.</p>
+    <p>Please type your WUSTL email address in the field below and click &quot;submit&quot;. A unique API key will
+        be generated that you can use to submit and retrieve data. This API Key is unique to you. If you lose your API key, you will also lose any data associated with it. However, you can generate a new API key at any time with the same name and email address, to start over with new data.</p>
+    <!--
+    register form-->
+    <div class="row">
+        <div class="col-lg-6 offset-md-3">
+            <form method="POST" action="" id="api-form">
+                <div class="form-group">
+                    <label for="name">Name:</label>
+                    <input class="form-control" id="name" type="text" placeholder="first and last" name="name" required="required">
+                </div>
+                <div class="form-group">
+                    <label for="email">WUSTL Email:</label>
+                    <input class="form-control" id="email" type="email" placeholder="name@email.com" name="email"
+                        required="required">
+                </div>
+                <button class="btn btn-primary" type="submit" id="api-form-submit">Generate API Key</button>
+            </form>
+        </div>
+    </div>
+    <div class="row" id="api-key-container">
+        <div class="col-lg-8 offset-md-2">
+            <div class="card text-success bg-light">
+                <div class="card-header">
+                    <h3 class="card-title">Your API Key</h3>
+                </div>
+                <div class="card-body text-center"><samp id="api-key"></samp></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+        crossorigin="anonymous"></script>
+    <script src="scripts.js"></script>
+</body>
+
+</html>

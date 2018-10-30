@@ -4,16 +4,20 @@ const AWS = require('aws-sdk');
 // set region if not set (as not set by the SDK by default). required for offline usage
 if (!AWS.config.region) {
     AWS.config.update({
-      region: 'eu-central-1'
+      region: 'us-east-1'
     });
 }
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
 
 module.exports.list = (event, context, callback) => {
-    const params = {
+    var params = {
         TableName: process.env.TODOS_TABLE,
+        FilterExpression: '#user = :user',
+        ExpressionAttributeNames: { "#user": "user" },
+        ExpressionAttributeValues: { ':user': event.headers["X-Api-Key"] }
     };
+
 
     dynamoDb.scan(params, (error, result) => {
         // handle potential errors

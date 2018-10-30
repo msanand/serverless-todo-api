@@ -5,10 +5,10 @@ const AWS = require('aws-sdk');
 // set region if not set (as not set by the SDK by default). required for offline usage
 if (!AWS.config.region) {
     AWS.config.update({
-      region: 'eu-central-1'
+      region: 'us-east-1'
     });
 }
-const dynamoDb = new AWS.DynamoDB.DocumentClient();
+const dynamoDb = new AWS.DynamoDB();
 
 
 module.exports.update = (event, context, callback) => {
@@ -16,15 +16,28 @@ module.exports.update = (event, context, callback) => {
     const todoItem = JSON.parse(event.body);
 
     const params = {
-        TableName: process.env.TODOS_TABLE,
-        Item: {
-            id: todoItem.id,
-            text: todoItem.text,
-            completed: todoItem.completed
+        ExpressionAttributeNames: {
+            "#c": "completed",
         },
+        ExpressionAttributeValues: {
+            ":c": {
+                BOOL: todoItem.completed
+            }
+        },
+        Key: {
+            "user": {
+                S: event.headers["X-Api-Key"]
+            },
+            "id": {
+                S: event.pathParameters.id
+            }
+        },
+        ReturnValues: "ALL_NEW",
+        TableName: process.env.TODOS_TABLE,
+        UpdateExpression: "SET #c = :c"
     };
 
-    dynamoDb.put(params, (error) => {
+    dynamoDb.updateItem(params, (error, data) => {
         if (error) {
             console.error(error);
             callback(null, {
@@ -38,8 +51,7 @@ module.exports.update = (event, context, callback) => {
         }
 
         callback(null, {
-            statusCode: 200,
-            body: JSON.stringify(params.Item),
+            statusCode: 200
         });
     });
 

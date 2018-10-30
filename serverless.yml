@@ -1,6 +1,6 @@
 
 # Name of the service
-service: sls-todo-api
+service: cse204-todo-api
 
 # Plugins enhancing serverless framework
 plugins:
@@ -8,8 +8,30 @@ plugins:
   - serverless-dynamodb-local
   # Offline plugin for local development and testing
   - serverless-offline
+  # s3 sync for frontend page
+  - serverless-s3-sync
+  # domain for api gateway
+  - serverless-domain-manager
 
 custom:
+
+  siteName: cse204.kraigh.net
+  localDir: static
+  
+  hostedZoneName: kraigh.net
+  aliasHostedZoneId: Z3AQBSTGFYJSTF
+  aliasDNSName: s3-website-us-east-1.amazonaws.com
+
+  customDomain:
+    domainName: api.kraigh.net
+    basePath: ''
+    stage: ${self:provider.stage}
+    createRoute53Record: true
+
+  s3Sync:
+    - bucketName: ${self:custom.siteName}
+      localDir: static
+
   # Offline plugin configuration
   serverless-offline:
     port: 4000
@@ -46,11 +68,15 @@ provider:
         - dynamodb:PutItem
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
-      Resource: "arn:aws:dynamodb:eu-central-1:*:table/${self:provider.environment.TODOS_TABLE}"
+      Resource: "arn:aws:dynamodb:us-east-1:*:table/${self:provider.environment.TODOS_TABLE}"
+    - Effect: Allow
+      Action:
+        - apigateway:POST
+      Resource: "arn:aws:apigateway:us-east-1::/apikeys"
   # Configured as a dev stage
   stage: dev
   # Chosen AWS Region
-  region: eu-central-1
+  region: us-east-1
 
 # FaaS funtions
 functions:
@@ -89,7 +115,14 @@ functions:
       - http:
           path: todos
           method: GET
-          cors: true           
+          cors: true   
+  apiKey:
+    handler: todos/apiKey.create
+    events:
+      - http:
+          path: apiKey
+          method: POST
+          cors: true        
 
 # Confiure the resources required for this service: AWS Dynamo DB Table
 resources:
@@ -97,16 +130,61 @@ resources:
     TodoTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        AttributeDefinitions:
-          -
-            AttributeName: id
-            AttributeType: S
-        KeySchema:
-          -
-            AttributeName: id
-            KeyType: HASH
+        AttributeDefinitions: 
+          - 
+            AttributeName: "user"
+            AttributeType: "S"
+          - 
+            AttributeName: "id"
+            AttributeType: "S"
+        KeySchema: 
+          - 
+            AttributeName: "user"
+            KeyType: "HASH"
+          - 
+            AttributeName: "id"
+            KeyType: "RANGE"
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
         TableName: ${self:provider.environment.TODOS_TABLE}
+    StaticSite:
+      Type: AWS::S3::Bucket
+      Properties:
+        AccessControl: PublicRead
+        BucketName: ${self:custom.siteName}
+        WebsiteConfiguration:
+          IndexDocument: index.html
+    StaticSiteS3BucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket:
+          Ref: StaticSite
+        PolicyDocument:
+          Statement:
+            - Sid: PublicReadGetObject
+              Effect: Allow
+              Principal: "*"
+              Action:
+              - s3:GetObject
+              Resource:
+                Fn::Join: [
+                  "", [
+                    "arn:aws:s3:::",
+                    {
+                      "Ref": "StaticSite"
+                    },
+                    "/*"
+                  ]
+                ]
+    DnsRecord:
+      Type: "AWS::Route53::RecordSet"
+      Properties:
+        AliasTarget:
+          DNSName: ${self:custom.aliasDNSName}
+          HostedZoneId: ${self:custom.aliasHostedZoneId}
+        HostedZoneName: ${self:custom.hostedZoneName}.
+        Name:
+          Ref: StaticSite
+        Type: 'A'
 
