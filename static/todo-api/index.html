@@ -336,15 +336,125 @@ xhttp2.send(JSON.stringify(data));</pre>
     </section>
     <section id="get-info">
         <h3>GET a ToDo</h3>
+        <p>To retrieve the info for a single ToDo, send a GET request to this URL, with the ToDo's <code>id</code> in place of <code>{id}</code>.</p>
+        <pre class="text-info bg-light p-3">https://api.kraigh.net/todos/{id}</pre>
+        <p>Make sure you include your API Key in the <code>x-api-key</code> header.</p>
+        <p>If unsuccessful, this GET request will return a text error. If successful,
+            it will return a single JSON object containing the ToDo that you requested. This object will have <code>text</code>, <code>id</code>, <code>completed</code>, <code>created</code>, <code>updated</code>, and <code>user</code> properties.</p>
+        <p><strong>Note:</strong> depending on how you structure your application, you may not need to use this endpoint, since the LIST endpoint returns full ToDo objects.</p>
+            <div class="accordion" id="getExample">
+            <div class="card">
+                <div class="card-header" id="getJavascriptHeading">
+                    <h5 class="mb-0">
+                        <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#getJavascript"
+                            aria-expanded="true" aria-controls="getJavascript">
+                            Javascript Example +
+                        </button>
+                    </h5>
+                </div>
+        
+                <div id="getJavascript" class="collapse" aria-labelledby="getJavascriptHeading" data-parent="#getExample">
+                    <div class="card-body bg-light p-3">
+                        <pre class="text-info">
+// Setting variable for ToDo id
+var id = "abcd-1234"
 
+// Initalize AJAX Request
+var xhttp2 = new XMLHttpRequest();
+
+// Response handler
+xhttp2.onreadystatechange = function() {
+
+    // Wait for readyState = 4 &amp; 200 response
+    if (this.readyState == 4 &amp;&amp; this.status == 200) {
+
+        // parse JSON response
+        var todo = JSON.parse(this.responseText);
+
+        console.log(todo);
+
+    } else if (this.readyState == 4) {
+
+        // this.status !== 200, error from server
+        console.log(this.responseText);
+
+    }
+};
+
+xhttp2.open(&quot;POST&quot;, &quot;https://api.kraigh.net/todos/&quot;+id, true);
+
+xhttp2.setRequestHeader(&quot;Content-type&quot;, &quot;application/json&quot;);
+xhr.setRequestHeader(&quot;x-api-key&quot;, &quot;abc123&quot;);
+xhttp2.send(JSON.stringify(data));</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
     </section>
     <section id="update-info">
         <h3>PUT ToDo Updates</h3>
+        <p>To change the properties of a ToDo, send a PUT request with the data you want to update to this url, with the <code>id</code> of the ToDo you want to update in place of <code>{id}</code></code></p>
+        <pre class="text-info bg-light p-3">https://api.kraigh.net/todos/{id}</pre>
+        <p>You will use this endpoint to change a ToDo's status to &quot;completed&quot; once it has been checked off. Optionally, if you want to allow for editing the text of your ToDos, you can accomplish that by including a new <code>text</code> value in your PUT request to this endpoint.</p>
+        <p>If unsuccessful, this GET request will return a text error. If successful,
+            it will return a <code>200</code> response code and an empty body response.</p>
+        <div class="accordion" id="updateExample">
+            <div class="card">
+                <div class="card-header" id="updateJavascriptHeading">
+                    <h5 class="mb-0">
+                        <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#updateJavascript"
+                            aria-expanded="true" aria-controls="updateJavascript">
+                            Javascript Example +
+                        </button>
+                    </h5>
+                </div>
+        
+                <div id="updateJavascript" class="collapse" aria-labelledby="updateJavascriptHeading" data-parent="#updateExample">
+                    <div class="card-body bg-light p-3">
+                        <pre class="text-info">
+// You're on your own for this one!
 
+// Make sure you include a ToDo ID in the URL, you will probably get that ID from the ID field of your ToDo element in HTML inside your click event.
+
+// Also, make sure you make the request method "PUT" and include a JSON object with your updates, probably something like:
+var data = {
+    completed: true
+}
+</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
     </section>
     <section id="delete-info">
         <h3>DELETE a ToDo</h3>
+        <p>To delete a ToDo, send a DELETE request with the data you want to update to this url, with the <code>id</code>
+            of the ToDo you want to update in place of <code>{id}</code></code></p>
+        <pre class="text-info bg-light p-3">https://api.kraigh.net/todos/{id}</pre>
+        <p>If unsuccessful, this GET request will return a text error. If successful,
+            it will return a <code>200</code> response code and an empty body response.</p>
+        <div class="accordion" id="updateExample">
+            <div class="card">
+                <div class="card-header" id="updateJavascriptHeading">
+                    <h5 class="mb-0">
+                        <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#updateJavascript"
+                            aria-expanded="true" aria-controls="updateJavascript">
+                            Javascript Example +
+                        </button>
+                    </h5>
+                </div>
         
+                <div id="updateJavascript" class="collapse" aria-labelledby="updateJavascriptHeading" data-parent="#updateExample">
+                    <div class="card-body bg-light p-3">
+                        <pre class="text-info">
+        // You're on your own for this one!
+
+        // Make sure that you set the request method to "DELETE"
+        </pre>
+                    </div>
+                </div>
+            </div>
+        </div>
     </section>
 
 </div>
